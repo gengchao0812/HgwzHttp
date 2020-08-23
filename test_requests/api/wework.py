@@ -3,6 +3,7 @@ import re
 
 import pytest
 import requests
+import yaml
 from rest_framework.utils import json
 
 from test_requests.api.baseapi import BaseApi
@@ -11,6 +12,9 @@ from test_requests.api.util import Util
 class WeWork(BaseApi):
     def __init__(self):
         self.token = Util().get_token()
+        self.params["token"] = self.token
+        with open("../api/wework.yaml",encoding="utf-8") as f:
+            self.data = yaml.load(f)
 
     #扩展到所有模块@pytest.fixture(scope="session")
     # #获取一次 提高运行速度
@@ -32,25 +36,29 @@ class WeWork(BaseApi):
         """
         # access_token = self.get_token()
         if department is None:
-            department = [1]
+            department = "1"
         # 反序列化
         # # json.loads()
         # print(json.dumps(request_body))
         # print(request_body)
         # r = requests.post(f"https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token={self.token}",
         #               json=request_body)
-        data = {
-            "method":"post",
-            "url" : f"https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token={self.token}",
-            "json":{
-                "userid": userid,
-                "name": name,
-                "mobile": mobile,
-                "department": department
-                    }
-        }
+        # data = {
+        #     "method":"post",
+        #     "url" : f"https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token={self.token}",
+        #     "json":{
+        #         "userid": userid,
+        #         "name": name,
+        #         "mobile": mobile,
+        #         "department": department
+        #             }
+        # }
+        self.params["userid"] = userid
+        self.params["mobile"] = mobile
+        self.params["name"] = name
+        self.params["department"] = department
         #反序列化 等于json.loads
-        return self.send(data)
+        return self.send(self.data["create"])
 
     def test_get(self,userid):
         """
@@ -58,23 +66,39 @@ class WeWork(BaseApi):
         https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=ACCESS_TOKEN&userid=USERID
         :return:
         """
-        r = requests.get(f"https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token={self.token}&userid={userid}")
-        return r.json()
+        # r = requests.get(f"https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token={self.token}&userid={userid}")
+        # data = {
+        #     "method":"get",
+        #     "url":f'https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token={self.token}&userid={userid}'
+        # }
+        self.params["userid"] = userid
+        return self.send(self.data["get"])
+        # return r.json()
 
-    def test_update(self,userid,name = "柯南" ):
+    def test_update(self,userid,name = "柯南111" ):
         """
         更新
         https://qyapi.weixin.qq.com/cgi-bin/user/update?access_token=ACCESS_TOKEN
         :return:
         """
-        request_body = {
-            "userid": userid,
-            "name": name
-            # **kwargs
-        }
-        r = requests.post(f"https://qyapi.weixin.qq.com/cgi-bin/user/update?access_token={self.token}",
-                          json=request_body)
-        return r.json()
+        # request_body = {
+        #     "userid": userid,
+        #     "name": name
+        #     # **kwargs
+        # }
+        # r = requests.post(f"https://qyapi.weixin.qq.com/cgi-bin/user/update?access_token={self.token}",
+        #                   json=request_body)
+        # data={
+        #     "method":"post",
+        #     "url":f"https://qyapi.weixin.qq.com/cgi-bin/user/update?access_token={self.token}",
+        #     "json":{
+        #         "userid": userid,
+        #         "name": name
+        #             }
+        # }
+        self.params["userid"] = userid
+        self.params["name"] = name
+        return self.send(self.data["update"])
 
     def test_delete(self,userid):
         """
@@ -82,5 +106,12 @@ class WeWork(BaseApi):
         https://qyapi.weixin.qq.com/cgi-bin/user/delete?access_token=ACCESS_TOKEN&userid=USERID
         :return:
         """
-        r = requests.get(f"https://qyapi.weixin.qq.com/cgi-bin/user/delete?access_token={self.token}&userid={userid}")
-        return r.json()
+        # r = requests.get(f"https://qyapi.weixin.qq.com/cgi-bin/user/delete?access_token={self.token}&userid={userid}")
+        # data = {
+        #     "method":"get",
+        #     "url":f"https://qyapi.weixin.qq.com/cgi-bin/user/delete?access_token={self.token}&userid={userid}"
+        # }
+        self.params["userid"] = userid
+        # 反序列化 等于json.loads
+        return self.send(self.data["delete"])
+        # return r.json()
